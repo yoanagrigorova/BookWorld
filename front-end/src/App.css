@@ -1,3 +1,16 @@
+@font-face {
+  font-family: blackword;
+  src: url(./fonts/Averta/AvertaDemoPE-Regular.woff);
+}
+
+*{
+ font-family: blackword; 
+}
+
+.nav-wrapper ul li{
+  font-size: 20px !important;
+}
+
 .App {
   text-align: center;
 }
@@ -35,4 +48,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+nav{
+  background-color: #3aafa9;
 }

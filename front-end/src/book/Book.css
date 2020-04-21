@@ -1,0 +1,25 @@
+.bookContainer {
+    margin-top: 50px;
+    text-align: left;
+}
+
+.bookContainer .fieldName{
+    font-weight: bold;
+}
+
+.MuiRating-label {
+    color: #e2ba7f;
+    font-size: 25px;
+}
+
+.MuiBox-root{
+    font-size: 17px;
+}
+
+.collection {
+    border: none;
+}
+
+.collection-item {
+    margin-top: 15px !important;
+}

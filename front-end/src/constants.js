@@ -1,0 +1,15 @@
+export const ADD_USER = "ADD_USER";
+export const CREATE_SESSION = "CREATE_SESSION";
+export const GET_FAVORITES = "GET_FAVORITES"
+export const LOGIN = "LOGIN"
+export const ADD_FAVORITE = "ADD_FAVORITE";
+export const GET_BOOKS = "GET_BOOKS";
+export const REMOVE_FAVORITE = "REMOVE_FAVORITE";
+export const ADD_WISH = "ADD_WISH";
+export const GET_WISHED = "GET_WISHED"
+export const REMOVE_WISH = "REMOVE_WISH"
+export const ADD_READ = "ADD_READ"
+export const GET_READ = "GET_READ"
+export const REMOVE_READ = "REMOVE_READ"
+export const GET_BOOK = "GET_BOOK"
+export const ADD_COMMENT = "ADD_COMMENT"

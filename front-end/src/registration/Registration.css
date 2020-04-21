@@ -1,0 +1,31 @@
+.registration .container{
+    display: inline-block;
+    width:600px;
+    height: 500px;
+    border-radius: 20px;
+    position: relative;
+    background-color: #def2f1;
+    margin-top: 100px;
+}
+
+.registration button {
+    background-color: #3aafa9 !important;
+    font-family: blackword;
+}
+
+.errorMessage {
+    color: #a24343;
+    height: 20px;
+    display: inline-block;
+    padding: 0px;
+    margin: 0px;
+    font-weight: bold;
+}
+
+.errorMessage p {
+    display: inline-block;
+    bottom: 8px;
+    position: relative;
+    padding: 0px;
+    margin: 0px;
+}

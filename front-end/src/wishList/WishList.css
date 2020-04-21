@@ -1,0 +1,30 @@
+/* .wishList .card-title {
+    width: 308px;
+    display: inline-block !important;
+}
+
+.wishList .card-title .title {
+    margin-left: 40px;
+}
+
+.wishList .card-action a {
+    color: #34b3ac !important;
+} */
+
+.wishList .card-title {
+    /* width: 308px; */
+    display: inline-block !important;
+}
+
+.wishList .card-image img{
+    height:192px !important;
+}
+
+.wishList .card-action a {
+    color: #34b3ac !important;
+}
+
+.wishList .noResult {
+    margin-top: 120px;
+    font-size: 30px;
+}

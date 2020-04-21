@@ -1,0 +1,30 @@
+/* .read .card-title {
+    width: 308px;
+    display: inline-block !important;
+}
+
+.read .card-title .title {
+    margin-left: 40px;
+}
+
+.read .card-action a {
+    color: #34b3ac !important;
+} */
+
+.read .card-title {
+    /* width: 308px; */
+    display: inline-block !important;
+}
+
+.read .card-image img{
+    height:192px !important;
+}
+
+.read .card-action a {
+    color: #34b3ac !important;
+}
+
+.read .noResult {
+    margin-top: 120px;
+    font-size: 30px;
+}

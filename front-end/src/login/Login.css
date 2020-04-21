@@ -1,0 +1,16 @@
+
+.login {
+    display: inline-block;
+    position: relative;
+    width: 600px;
+    height: 350px;
+    background-color: #def2f1;
+    margin-top: 100px;
+    border-radius: 20px;
+}
+
+.login button {
+    background-color: #3aafa9 !important;
+    font-family: blackword;
+}
+
