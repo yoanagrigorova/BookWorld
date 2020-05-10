@@ -41,34 +41,33 @@ router.get('/all', function (req, res) {
 
 })
 
-router.post('/favorites', function (req, res) {
-    User.findById(req.body.userID).then(user => {
+router.get('/favorites', function (req, res) {
+    User.findById(req.query.userID).then(user => {
         Books.find({ _id: { $in: user.favorites } }).then(books => {
             res.send(books);
         })
     })
 })
 
-router.post('/wish', function (req, res) {
-    User.findById(req.body.userID).then(user => {
+router.get('/wish', function (req, res) {
+    User.findById(req.query.userID).then(user => {
         Books.find({ _id: { $in: user.wish } }).then(books => {
             res.send(books);
         })
     })
 })
 
-router.post('/read', function (req, res) {
-    User.findById(req.body.userID).then(user => {
+router.get('/read', function (req, res) {
+    User.findById(req.query.userID).then(user => {
         Books.find({ _id: { $in: user.read } }).then(books => {
             res.send(books);
         })
     })
 })
 
-router.post('/book', function (req, res) {
-    Books.find({ _id: req.body.bookID}).then(book => {
-        Comments.find({book: req.body.bookID}).then(comments => {
-            console.log(comments)
+router.get('/book', function (req, res) {
+    Books.find({ _id: req.query.bookID}).then(book => {
+        Comments.find({book: req.query.bookID}).then(comments => {
             book.comments = [...comments];
             res.send({
                 book: book,

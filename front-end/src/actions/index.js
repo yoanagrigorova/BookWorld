@@ -52,13 +52,7 @@ export function getBooks() {
 
 export function getFavorites(userID) {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/favorites', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({userID: userID}),
-    })
+    return fetch('http://localhost:5000/books/favorites?userID='+userID)
       .then((response) => response.json())
       .then((data) => {
         return dispatch(getFavoriteBooks(data))
@@ -74,7 +68,7 @@ export function getFavorites(userID) {
 export function removeFavorite(data) {
   return (dispatch) => {
     return fetch('http://localhost:5000/users/removeFavorite', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -93,7 +87,6 @@ export function removeFavorite(data) {
 }
 
 export function login(data){
-  console.log(data)
   return (dispatch) => {
     return fetch('http://localhost:5000/users/login', {
       method: 'POST',
@@ -116,7 +109,7 @@ export function login(data){
 export function addToFavorite(data){
   return (dispatch) => {
     return fetch('http://localhost:5000/users/addFavorite', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -135,7 +128,7 @@ export function addToFavorite(data){
 export function addToWish(data){
   return (dispatch) => {
     return fetch('http://localhost:5000/users/addWish', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -153,13 +146,7 @@ export function addToWish(data){
 
 export function getWished(userID) {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/wish', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({userID: userID}),
-    })
+    return fetch('http://localhost:5000/books/wish?userID='+userID)
       .then((response) => response.json())
       .then((data) => {
         return dispatch({type: GET_WISHED, data})
@@ -175,7 +162,7 @@ export function getWished(userID) {
 export function removeWish(data){
   return (dispatch) => {
     return fetch('http://localhost:5000/users/removeWish', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -195,7 +182,7 @@ export function removeWish(data){
 export function addToRead(data){
   return (dispatch) => {
     return fetch('http://localhost:5000/users/addRead', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -213,13 +200,7 @@ export function addToRead(data){
 
 export function getRead(userID) {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/read', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({userID: userID}),
-    })
+    return fetch('http://localhost:5000/books/read?userID=' + userID)
       .then((response) => response.json())
       .then((data) => {
         return dispatch({type: GET_READ, data})
@@ -235,7 +216,7 @@ export function getRead(userID) {
 export function removeRead(data){
   return (dispatch) => {
     return fetch('http://localhost:5000/users/removeRead', {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -254,13 +235,7 @@ export function removeRead(data){
 
 export function getBook(bookID){
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/book', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({bookID: bookID}),
-    })
+    return fetch('http://localhost:5000/books/book?bookID='+bookID)
       .then((response) => response.json())
       .then((data) => {
         return dispatch({type: GET_BOOK, data})

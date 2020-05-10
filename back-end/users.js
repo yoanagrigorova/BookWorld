@@ -114,7 +114,7 @@ router.post('/login', function (req, res) {
 
 })
 
-router.post("/addFavorite", (req, res) => {
+router.put("/addFavorite", (req, res) => {
     let email = req.body.email;
     let book = req.body.bookID;
 
@@ -138,7 +138,7 @@ router.post("/addFavorite", (req, res) => {
 
 })
 
-router.post("/removeFavorite", (req, res) => {
+router.put("/removeFavorite", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
 
@@ -163,7 +163,7 @@ router.post("/removeFavorite", (req, res) => {
 })
 
 
-router.post("/removeWish", (req, res) => {
+router.put("/removeWish", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
 
@@ -187,7 +187,7 @@ router.post("/removeWish", (req, res) => {
 
 })
 
-router.post("/addRead", (req, res) => {
+router.put("/addRead", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
 
@@ -211,7 +211,7 @@ router.post("/addRead", (req, res) => {
 
 })
 
-router.post("/removeRead", (req, res) => {
+router.put("/removeRead", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
 
@@ -235,7 +235,7 @@ router.post("/removeRead", (req, res) => {
 
 })
 
-router.post("/addWish", (req, res) => {
+router.put("/addWish", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
 
