@@ -58,8 +58,11 @@ class Registration extends React.Component {
                         errorMessage: data.payload.message,
                         pending: false
                     })
-                }else {
-                    return <Redirect to='/favorites'  />
+                }
+
+                if (data.payload.result === 'success') {
+                    this.props.update(data.payload);
+                    this.props.history.push("/");
                 }
             })
             //send to home page with signed in user

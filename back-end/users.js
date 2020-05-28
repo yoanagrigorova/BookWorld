@@ -1,64 +1,68 @@
-const express = require('express');
-const router = express.Router();
-const mongoose = require('mongoose');
-const mongo = require('mongodb').MongoClient
-const mongoURI = "mongodb://yoana.grigorova:magic123@ds135089.mlab.com:35089/bookworld";
-const sha1 = require('sha1')
+var express = require('express');
+var router = express.Router();
+const sha1 = require('sha1');
 
-mongoose.connect(
-    mongoURI,
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+router.get("/all", function(req,res){
+    let db = req.db;
+    let User = db.get("users");
+    User.find().then(data=>{
+        let users = data.filter(u => u._id).map(user => {return {username: user.username, id: user._id, photo: user.photo, email:user.email}})
+        res.send(users)
+    })
+})
+
+router.get('/checkSession', function (req, res) {
+    // console.log(req.sessionID)
+    if (req.session.user) {
+        res.send(req.session.user)
+    } else {
+        res.send(JSON.stringify(null));
     }
-);
+});
 
-const schema = {
-    // firstName: { type: mongoose.SchemaTypes.String },
-    // lastName: { type: mongoose.SchemaTypes.String },
-    username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    password: {
-        type: String,
-        required: true,
-        select: false
-    },
-    favorites: { type: [String], index: true },
-    read: { type: [String], index: true },
-    wish: { type: [String], index: true },
-    role: String
-};
-const collectionName = "users";
-const userSchema = mongoose.Schema(schema);
-const User = mongoose.model(collectionName, userSchema);
+router.get('/signOut', function (req, res) {
+    // console.log(req.sessionID)
+    if (req.session.user) {
+        req.session.destroy();
+        res.send(JSON.stringify(null))
+    } else {
+        res.sendStatus(JSON.stringify(null));
+    }
+});
 
 router.post('/create', function (req, res) {
-    let sess = req.session
-    User.create({
+    let db = req.db;
+    let User = db.get("users");
+    User.insert({
         username: req.body.username,
         email: req.body.email,
         password: sha1(req.body.password),
         favorites: [],
         read: [],
         wish: [],
-        role: "user"
+        role: "user",
+        photo: "https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png"
     }).then((data) => {
-        sess.user = {
-            username: data.username,
+        req.session.user = {
+            id: data._id,
             email: data.email,
+            username: data.username,
             role: data.role,
             favorites: data.favorites,
             read: data.read,
-            wish: data.wish
+            wish: data.wish,
+            photo: data.photo
         }
         res.send({
             result: "success",
-            username: data.username,
+            id: data._id,
             email: data.email,
+            username: data.username,
             role: data.role,
             favorites: data.favorites,
             read: data.read,
-            wish: data.wish
+            wish: data.wish,
+            photo: data.photo
         })
     }).catch((err) => {
         if (err.errmsg && err.errmsg.indexOf(req.body.email) !== -1) {
@@ -81,20 +85,23 @@ router.post('/create', function (req, res) {
 })
 
 router.post('/login', function (req, res) {
-    let sess = req.session
+    let db = req.db;
+    let User = db.get("users");
     User.findOne({
         email: req.body.email,
         password: sha1(req.body.password),
     }).then((data) => {
-        sess.user = {
+        req.session.user = {
             id: data._id,
             email: data.email,
             username: data.username,
             role: data.role,
             favorites: data.favorites,
             read: data.read,
-            wish: data.wish
+            wish: data.wish,
+            photo: data.photo
         }
+        req.session.save()
         res.send({
             result: "success",
             id: data._id,
@@ -103,7 +110,8 @@ router.post('/login', function (req, res) {
             role: data.role,
             favorites: data.favorites,
             read: data.read,
-            wish: data.wish
+            wish: data.wish,
+            photo: data.photo
         })
     }).catch((err) => {
         res.send({
@@ -117,11 +125,23 @@ router.post('/login', function (req, res) {
 router.put("/addFavorite", (req, res) => {
     let email = req.body.email;
     let book = req.body.bookID;
+    let db = req.db;
+    let User = db.get("users");
 
     User.findOneAndUpdate({
-        email: email
+        _id: req.session.user.id
     },
         { "$push": { "favorites": book } }, { "upsert": true, "new": true }).then(data => {
+            req.session.user = {
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            }
             res.send({
                 result: "success",
                 id: data._id,
@@ -130,7 +150,8 @@ router.put("/addFavorite", (req, res) => {
                 role: data.role,
                 favorites: data.favorites,
                 read: data.read,
-                wish: data.wish
+                wish: data.wish,
+                photo: data.photo
             })
         }).catch(err => {
             res.send(err);
@@ -141,60 +162,23 @@ router.put("/addFavorite", (req, res) => {
 router.put("/removeFavorite", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
+    let db = req.db;
+    let User = db.get("users");
 
     User.findOneAndUpdate({
-        _id: user
+        _id: req.session.user.id
     },
-    {"$pull" : {"favorites":  book}}, { "multi": true }).then(data => {
-        res.send({
-            result: "success",
-            id: data._id,
-            email: data.email,
-            username: data.username,
-            role: data.role,
-            favorites: data.favorites,
-            read: data.read,
-            wish: data.wish
-        })
-    }).catch(err => {
-        res.send(err);
-    })
-
-})
-
-
-router.put("/removeWish", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
-
-    User.findOneAndUpdate({
-        _id: user
-    },
-    {"$pull" : {"wish":  book}}, { "multi": true }).then(data => {
-        res.send({
-            result: "success",
-            id: data._id,
-            email: data.email,
-            username: data.username,
-            role: data.role,
-            favorites: data.favorites,
-            read: data.read,
-            wish: data.wish
-        })
-    }).catch(err => {
-        res.send(err);
-    })
-
-})
-
-router.put("/addRead", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
-
-    User.findOneAndUpdate({
-        _id: user
-    },
-        { "$push": { "read": book } }, { "upsert": true, "new": true }).then(data => {
+        { "$pull": { "favorites": book } }, { "multi": true }).then(data => {
+            req.session.user = {
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            }
             res.send({
                 result: "success",
                 id: data._id,
@@ -203,7 +187,82 @@ router.put("/addRead", (req, res) => {
                 role: data.role,
                 favorites: data.favorites,
                 read: data.read,
-                wish: data.wish
+                wish: data.wish,
+                photo: data.photo
+            })
+        }).catch(err => {
+            res.send(err);
+        })
+
+})
+
+
+router.put("/removeWish", (req, res) => {
+    let user = req.body.userID;
+    let book = req.body.bookID;
+    let db = req.db;
+    let User = db.get("users");
+    User.findOneAndUpdate({
+        _id: req.session.user.id
+    },
+        { "$pull": { "wish": book } }, { "multi": true }).then(data => {
+            req.session.user = {
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            }
+            res.send({
+                result: "success",
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            })
+        }).catch(err => {
+            res.send(err);
+        })
+
+})
+
+router.put("/addRead", (req, res) => {
+    let user = req.body.userID;
+    let book = req.body.bookID;
+    let db = req.db;
+    let User = db.get("users");
+
+    User.findOneAndUpdate({
+        _id: req.session.user.id
+    },
+        { "$push": { "read": book } }, { "upsert": true, "new": true }).then(data => {
+            req.session.user = {
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            }
+            res.send({
+                result: "success",
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
             })
         }).catch(err => {
             res.send(err);
@@ -215,34 +274,23 @@ router.put("/removeRead", (req, res) => {
     let user = req.body.userID;
     let book = req.body.bookID;
 
-    User.findOneAndUpdate({
-        _id: user
-    },
-    {"$pull" : {"read":  book}}, { "multi": true }).then(data => {
-        res.send({
-            result: "success",
-            id: data._id,
-            email: data.email,
-            username: data.username,
-            role: data.role,
-            favorites: data.favorites,
-            read: data.read,
-            wish: data.wish
-        })
-    }).catch(err => {
-        res.send(err);
-    })
-
-})
-
-router.put("/addWish", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
+    let db = req.db;
+    let User = db.get("users");
 
     User.findOneAndUpdate({
-        _id: user
+        _id: req.session.user.id
     },
-        { "$push": { "wish": book } }, { "upsert": true, "new": true }).then(data => {
+        { "$pull": { "read": book } }, { "multi": true }).then(data => {
+            req.session.user = {
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            }
             res.send({
                 result: "success",
                 id: data._id,
@@ -251,7 +299,46 @@ router.put("/addWish", (req, res) => {
                 role: data.role,
                 favorites: data.favorites,
                 read: data.read,
-                wish: data.wish
+                wish: data.wish,
+                photo: data.photo
+            })
+        }).catch(err => {
+            res.send(err);
+        })
+
+})
+
+router.put("/addWish", (req, res) => {
+    let user = req.body.userID;
+    let book = req.body.bookID;
+
+    let db = req.db;
+    let User = db.get("users");
+
+    User.findOneAndUpdate({
+        _id: req.session.user.id
+    },
+        { "$push": { "wish": book } }, { "upsert": true, "new": true }).then(data => {
+            req.session.user = {
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
+            }
+            res.send({
+                result: "success",
+                id: data._id,
+                email: data.email,
+                username: data.username,
+                role: data.role,
+                favorites: data.favorites,
+                read: data.read,
+                wish: data.wish,
+                photo: data.photo
             })
         }).catch(err => {
             res.send(err);
@@ -260,6 +347,5 @@ router.put("/addWish", (req, res) => {
 })
 
 module.exports = {
-    router: router,
-    User: User
+    router: router
 };

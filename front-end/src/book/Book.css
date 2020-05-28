@@ -16,10 +16,23 @@
     font-size: 17px;
 }
 
+.MuiRating-root.Mui-disabled{
+    opacity: 1!important;
+}
+
 .collection {
     border: none;
 }
 
 .collection-item {
     margin-top: 15px !important;
+}
+
+.recommend-book{
+    vertical-align: middle;
+    margin-top: 35px;
+}
+
+.users li {
+    cursor: pointer;
 }

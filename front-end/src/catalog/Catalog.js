@@ -1,19 +1,21 @@
 import React from 'react';
 import "./Catalog.css"
 import { addToFavorite } from "../actions/index";
-import { getBooks, removeFavorite, addToWish, removeWish, addToRead, removeRead } from "../actions/index";
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link,
-    Redirect
-  } from "react-router-dom";
+    getBooks, removeFavorite, addToWish, removeWish, addToRead, removeRead, getFavorites,
+    getRead, getWished, checkSession
+} from "../actions/index";
+import {
+    Link
+} from "react-router-dom";
 import { connect } from "react-redux";
 import M from 'materialize-css';
 
 const mapStateToProps = state => {
-    return { currentUser: state.currentUser };
+    return {
+        currentUser: state.currentUser,
+        books: state.books
+    };
 };
 
 function mapDispatchToProps(dispatch) {
@@ -24,7 +26,11 @@ function mapDispatchToProps(dispatch) {
         addToWish: data => dispatch(addToWish(data)),
         removeWish: data => dispatch(removeWish(data)),
         addToRead: data => dispatch(addToRead(data)),
-        removeRead: data => dispatch(removeRead(data))
+        removeRead: data => dispatch(removeRead(data)),
+        getFavorites: data => dispatch(getFavorites(data)),
+        getRead: data => dispatch(getRead(data)),
+        getWished: data => dispatch(getWished(data)),
+        checkSession: () => dispatch(checkSession())
     };
 }
 
@@ -38,22 +44,66 @@ class Catalog extends React.Component {
             filtered: [],
             search: "",
             categories: [],
-            currentUser: JSON.parse(window.localStorage.getItem("currentUser"))
+            currentUser: props.currentUser ? props.currentUser : null
         }
-        props.getBooks("user").then((data) => {
+        if (!props.currentUser) {
+            props.checkSession().then(data => {
+                if (data) {
+                    this.setState({
+                        currentUser: data.data
+                    })
+                }
+            })
+        }
+        if (!props.books.length) {
+            props.getBooks("user").then((data) => {
+                let categories = []
+                data.data.map(book => [...book.categories]).forEach(category => categories.push(...category));
+                categories = [...new Set(categories)].sort();
+                let books = [...data.data]
+                books.forEach(book => {
+                    if (this.state.currentUser.favorites.indexOf(book._id) !== -1) {
+                        book.favorite = true
+                    }
+                    if (this.state.currentUser.wish.indexOf(book._id) !== -1) {
+                        book.wish = true
+                    }
+                    if (this.state.currentUser.read.indexOf(book._id) !== -1) {
+                        book.read = true
+                    }
+                })
+                this.setState({
+                    books: [...books],
+                    filtered: [...books],
+                    categories: [...categories],
+                })
+                M.FormSelect.init(this.select);
+            })
+        }
+
+    }
+
+    componentDidMount() {
+        if (this.props.books.length) {
             let categories = []
-            data.data.map(book => [...book.categories]).forEach(category => categories.push(...category));
+            this.props.books.map(book => [...book.categories]).forEach(category => categories.push(...category));
             categories = [...new Set(categories)].sort();
-            let books = [...data.data]
+            let books = [...this.props.books]
             books.forEach(book => {
                 if (this.state.currentUser.favorites.indexOf(book._id) !== -1) {
                     book.favorite = true
+                }else{
+                    book.favorite = false
                 }
                 if (this.state.currentUser.wish.indexOf(book._id) !== -1) {
                     book.wish = true
+                }else{
+                    book.wish = false
                 }
                 if (this.state.currentUser.read.indexOf(book._id) !== -1) {
                     book.read = true
+                }else{
+                    book.read = false
                 }
             })
             this.setState({
@@ -61,8 +111,8 @@ class Catalog extends React.Component {
                 filtered: [...books],
                 categories: [...categories],
             })
-            M.FormSelect.init(this.select);
-        })
+            setTimeout(() => M.FormSelect.init(this.select), 100)
+        }
     }
 
     handleSearchChange = (event) => {
@@ -97,7 +147,7 @@ class Catalog extends React.Component {
         let self = this;
         this.props.addToFavorite(data).then(data => {
             if (data.data.result && data.data.result === 'success') {
-                window.localStorage.setItem("currentUser", JSON.stringify(data.data));
+                // window.localStorage.setItem("currentUser", JSON.stringify(data.data));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -117,7 +167,8 @@ class Catalog extends React.Component {
                     filtered: [...dummy2]
                 })
             }
-
+            this.props.getFavorites(this.state.currentUser.id);
+            this.props.checkSession();
         })
     }
 
@@ -132,7 +183,7 @@ class Catalog extends React.Component {
                 let user = { ...this.state.currentUser };
                 let index = user.favorites.indexOf(bookID);
                 user.favorites.splice(index, 1);
-                window.localStorage.setItem("currentUser", JSON.stringify(user));
+                // window.localStorage.setItem("currentUser", JSON.stringify(user));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -153,11 +204,13 @@ class Catalog extends React.Component {
                 })
             }
 
+            this.props.getFavorites(this.state.currentUser.id)
+            this.props.checkSession();
         })
     }
 
     addToWishList = (bookID) => {
-        console.log(bookID);
+        // console.log(bookID);
         let data = {
             userID: this.state.currentUser.id,
             bookID: bookID
@@ -166,7 +219,7 @@ class Catalog extends React.Component {
         this.props.addToWish(data).then(data => {
             console.log(data)
             if (data.data.result && data.data.result === 'success') {
-                window.localStorage.setItem("currentUser", JSON.stringify(data.data));
+                // window.localStorage.setItem("currentUser", JSON.stringify(data.data));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -186,7 +239,8 @@ class Catalog extends React.Component {
                     filtered: [...dummy2]
                 })
             }
-
+            this.props.getWished(this.state.currentUser.id)
+            // this.props.checkSession();
         })
     }
 
@@ -201,7 +255,7 @@ class Catalog extends React.Component {
                 let user = { ...this.state.currentUser };
                 let index = user.wish.indexOf(bookID);
                 user.wish.splice(index, 1);
-                window.localStorage.setItem("currentUser", JSON.stringify(user));
+                // window.localStorage.setItem("currentUser", JSON.stringify(user));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -221,7 +275,8 @@ class Catalog extends React.Component {
                     filtered: [...dummy2]
                 })
             }
-
+            this.props.getWished(this.state.currentUser.id)
+            // this.props.checkSession();
         })
     }
 
@@ -233,7 +288,7 @@ class Catalog extends React.Component {
         let self = this;
         this.props.addToRead(data).then(data => {
             if (data.data.result && data.data.result === 'success') {
-                window.localStorage.setItem("currentUser", JSON.stringify(data.data));
+                // window.localStorage.setItem("currentUser", JSON.stringify(data.data));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -253,7 +308,8 @@ class Catalog extends React.Component {
                     filtered: [...dummy2]
                 })
             }
-
+            this.props.getRead(this.state.currentUser.id)
+            // this.props.checkSession();
         })
     }
 
@@ -268,7 +324,7 @@ class Catalog extends React.Component {
                 let user = { ...this.state.currentUser };
                 let index = user.read.indexOf(bookID);
                 user.read.splice(index, 1);
-                window.localStorage.setItem("currentUser", JSON.stringify(user));
+                // window.localStorage.setItem("currentUser", JSON.stringify(user));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -288,7 +344,8 @@ class Catalog extends React.Component {
                     filtered: [...dummy2]
                 })
             }
-
+            this.props.getRead(this.state.currentUser.id)
+            // this.props.checkSession();
         })
     }
 

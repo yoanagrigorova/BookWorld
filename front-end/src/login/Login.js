@@ -32,18 +32,17 @@ class Login extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        console.log(this.state)
 
         let data = {
-            email: this.state.email,
-            password: this.state.password
+            password: this.state.password,
+            email: this.state.email
         }
         this.props.login(data).then((data) => {
-            console.log(this.props)
-            console.log(data)
-            window.localStorage.setItem("currentUser", JSON.stringify(data.data))
-            this.props.update(data);
-            this.props.history.push("/");
+            if (data.data.result === 'success') {
+                // window.localStorage.setItem("currentUser", JSON.stringify(data.data))
+                this.props.update(data);
+                this.props.history.push("/");
+            }
         })
     }
 
