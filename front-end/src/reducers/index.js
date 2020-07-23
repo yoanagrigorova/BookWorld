@@ -3,6 +3,8 @@ import {
   LOGIN, GET_FAVORITES, ADD_FAVORITE, GET_BOOKS, REMOVE_FAVORITE, ADD_WISH,
   GET_READ, GET_WISHED, ADD_READ, REMOVE_READ, REMOVE_WISH, CHECK_SESSION, SIGN_OUT, GET_USERS
 } from "../constants";
+import socketIOClient from "socket.io-client";
+const ENDPOINT = "http://127.0.0.1:2325";
 
 const initialState = {
   currentUser: null,
@@ -14,6 +16,13 @@ const initialState = {
 };
 
 function rootReducer(state = initialState, action) {
+  const socket = socketIOClient(ENDPOINT);
+  socket.on("newBook", data => {
+    if(!state.books.find(b => b._id === data._id)){
+      state.books.push(data)
+    }
+  });
+
   switch (action.type) {
     case ADD_USER:
       state.currentUser = action.payload;

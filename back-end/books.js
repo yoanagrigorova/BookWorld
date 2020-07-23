@@ -1,7 +1,31 @@
 var express = require('express');
 var router = express.Router();
+const io = require('socket.io')();
+io.listen(2325);
 
-router.get('/all', function (req, res) {
+router.post('/', function (req, res) {
+    if (req.session.user.role === "admin") {
+        let db = req.db;
+        let Books = db.get("books")
+        Books.insert({
+            title: req.body.title,
+            image: req.body.image,
+            authors: req.body.authors,
+            description: req.body.description,
+            categories: req.body.categories,
+            comments: [],
+            rating: 0,
+            ratings: []
+        }).then(data => {
+            io.emit("newBook", data)
+            res.send(data);
+        })
+    } else {
+        res.sendStatus(401);
+    }
+})
+
+router.get('/', function (req, res) {
     let db = req.db;
     let Books = db.get("books")
     Books.find().then((data) => {
@@ -45,12 +69,12 @@ router.get('/read', function (req, res) {
     })
 })
 
-router.get('/book', function (req, res) {
+router.get('/:bookID', function (req, res) {
     let db = req.db;
     let Books = db.get("books")
     let Comments = db.get("comments")
-    Books.find({ _id: req.query.bookID }).then(book => {
-        Comments.find({ book: req.query.bookID }).then(comments => {
+    Books.find({ _id: req.params.bookID }).then(book => {
+        Comments.find({ book: req.params.bookID }).then(comments => {
             book.comments = [...comments];
             res.send({
                 book: book,
@@ -59,18 +83,18 @@ router.get('/book', function (req, res) {
         })
     })
 })
-router.put("/rating", function (req, res) {
+router.put("/rate/:bookID", function (req, res) {
     let db = req.db;
     let Books = db.get("books");
-    Books.findOneAndUpdate({ _id: req.body.bookID }, {$push: {ratings: {user: {username: req.session.user.username, id: req.session.user.id}, stars: req.body.stars} }}).then(book => {
+    Books.findOneAndUpdate({ _id: req.params.bookID }, { $push: { ratings: { user: { username: req.session.user.username, id: req.session.user.id }, stars: req.body.stars } } }).then(book => {
         res.send(book)
     })
 })
 
-router.put("/changeRating", function (req, res) {
+router.put("/changeRating/:bookID", function (req, res) {
     let db = req.db;
     let Books = db.get("books");
-    Books.findOneAndUpdate({ _id: req.body.bookID }, {$set: {rating: req.body.rating}}).then(book => {
+    Books.findOneAndUpdate({ _id: req.params.bookID }, { $set: { rating: req.body.rating } }).then(book => {
         res.send(book)
     })
 })

@@ -2,6 +2,7 @@ import React from 'react';
 import "./Login.css"
 import { login } from "../actions/index";
 import { connect } from "react-redux";
+import M from 'materialize-css';
 
 const mapStateToProps = state => {
     return { currentUser: state.currentUser };
@@ -20,8 +21,6 @@ class Login extends React.Component {
             password: ""
         };
 
-        console.log(props)
-
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -39,9 +38,10 @@ class Login extends React.Component {
         }
         this.props.login(data).then((data) => {
             if (data.data.result === 'success') {
-                // window.localStorage.setItem("currentUser", JSON.stringify(data.data))
                 this.props.update(data);
-                this.props.history.push("/");
+                this.props.history.push("/catalog");
+            }else{
+                M.toast({ html: `Wrong user credentials!` })
             }
         })
     }

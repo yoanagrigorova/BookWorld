@@ -32,3 +32,11 @@
 .tooltipped {
     cursor: pointer;
 }
+
+.check {
+    vertical-align: middle;
+    right: 25px;
+    bottom: 3px;
+    position: relative;
+    color: #34b3ac;
+}

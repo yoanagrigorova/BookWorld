@@ -1,9 +1,8 @@
 import fetch from 'cross-fetch'
-import axios from 'axios';
 
 import { ADD_USER, GET_FAVORITES, LOGIN, ADD_FAVORITE, GET_BOOKS, REMOVE_FAVORITE, ADD_WISH, GET_WISHED,
   REMOVE_WISH, ADD_READ, REMOVE_READ, GET_READ, GET_BOOK, ADD_COMMENT, CHECK_SESSION, SIGN_OUT, RATE_BOOK, CHANGE_RATING,
-  GET_USERS } from "../constants";
+  GET_USERS, SEND_NOTIFICATION, GET_NOTIFICATIONS, MARK_AS_READ, DELETE_COMMENT, CREATE_BOOK } from "../constants";
 
 function addUser(payload) {
   return { type: ADD_USER, payload };
@@ -16,7 +15,7 @@ function getFavoriteBooks(data){
 export function createUser(data) {
 
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/create', {
+    return fetch('http://localhost:5000/api/users/', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -28,7 +27,6 @@ export function createUser(data) {
       .then((data) => {
         console.log(data)
         return dispatch(addUser(data))
-        // dispatch({ type: ADD_USER, data })
       })
       .catch((error) => {
         console.log(error)
@@ -40,7 +38,7 @@ export function createUser(data) {
 
 export function getUsers() {
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/all', {
+    return fetch('http://localhost:5000/api/users/', {
       method: "GET",
       credentials: 'include'
     })
@@ -58,7 +56,7 @@ export function getUsers() {
 
 export function getBooks() {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/all', {
+    return fetch('http://localhost:5000/api/books/', {
       method: "GET",
       credentials: 'include'
     })
@@ -74,9 +72,31 @@ export function getBooks() {
 
 }
 
+export function createBook(data) {
+  return (dispatch) => {
+    return fetch('http://localhost:5000/api/books/', {
+      method: "POST",
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return dispatch({type: CREATE_BOOK, data})
+      })
+      .catch((error) => {
+        console.log(error)
+        console.error('Error:', error);
+      });
+  }
+
+}
+
 export function getFavorites() {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/favorites', {
+    return fetch('http://localhost:5000/api/books/favorites', {
       method: "GET",
       credentials: 'include'
     })
@@ -94,13 +114,13 @@ export function getFavorites() {
 
 export function rateBook(data) {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/rating', {
+    return fetch('http://localhost:5000/api/books/rate/'+data.bookID, {
       method: 'PUT',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     })
       .then((response) => response.json())
       .then((data) => {
@@ -117,13 +137,13 @@ export function rateBook(data) {
 export function changeRating(data) {
   console.log(data)
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/changeRating', {
+    return fetch('http://localhost:5000/api/books/changeRating/' + data.bookID, {
       method: 'PUT',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data)
     })
       .then((response) => response.json())
       .then((data) => {
@@ -139,13 +159,9 @@ export function changeRating(data) {
 
 export function removeFavorite(data) {
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/removeFavorite', {
+    return fetch('http://localhost:5000/api/users/removeFavorite/'+data.bookID, {
       method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      credentials: 'include'
     })
       .then((response) => response.json())
       .then((data) => {
@@ -161,7 +177,7 @@ export function removeFavorite(data) {
 
 export function login(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/login', {
+    return fetch('http://localhost:5000/api/users/login', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -182,13 +198,9 @@ export function login(data){
 
 export function addToFavorite(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/addFavorite', {
+    return fetch('http://localhost:5000/api/users/addFavorite/' + data.bookID, {
       method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+      credentials: 'include'
     })
       .then((response) => response.json())
       .then((data) => {
@@ -202,7 +214,7 @@ export function addToFavorite(data){
 
 export function addToWish(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/addWish', {
+    return fetch('http://localhost:5000/api/users/addWish/' + data.bookID, {
       method: 'PUT',
       credentials: 'include',
       headers: {
@@ -222,7 +234,7 @@ export function addToWish(data){
 
 export function getWished() {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/wish', {
+    return fetch('http://localhost:5000/api/books/wish', {
       method: "GET",
       credentials: 'include'
     })
@@ -240,7 +252,7 @@ export function getWished() {
 
 export function removeWish(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/removeWish', {
+    return fetch('http://localhost:5000/api/users/removeWish/' + data.bookID, {
       method: 'PUT',
       credentials: 'include',
       headers: {
@@ -261,7 +273,7 @@ export function removeWish(data){
 
 export function addToRead(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/addRead', {
+    return fetch('http://localhost:5000/api/users/addRead/' + data.bookID, {
       method: 'PUT',
       credentials: 'include',
       headers: {
@@ -281,7 +293,7 @@ export function addToRead(data){
 
 export function getRead(userID) {
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/read', {
+    return fetch('http://localhost:5000/api/books/read', {
       method: "GET",
       credentials: 'include'
     })
@@ -299,7 +311,7 @@ export function getRead(userID) {
 
 export function removeRead(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/removeRead', {
+    return fetch('http://localhost:5000/api/users/removeRead/' + data.bookID, {
       method: 'PUT',
       credentials: 'include',
       headers: {
@@ -320,7 +332,7 @@ export function removeRead(data){
 
 export function getBook(bookID){
   return (dispatch) => {
-    return fetch('http://localhost:5000/books/book?bookID='+bookID, {
+    return fetch('http://localhost:5000/api/books/'+bookID, {
       method: "GET",
       credentials: 'include'
     })
@@ -337,7 +349,7 @@ export function getBook(bookID){
 
 export function checkSession(){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/checkSession', {
+    return fetch('http://localhost:5000/api/users/checkSession', {
       method: "GET",
       credentials: 'include'
     })
@@ -354,7 +366,7 @@ export function checkSession(){
 
 export function signOut(){
   return (dispatch) => {
-    return fetch('http://localhost:5000/users/signOut', {
+    return fetch('http://localhost:5000/api/users/signOut', {
       method: "GET",
       credentials: 'include'
     })
@@ -371,7 +383,7 @@ export function signOut(){
 
 export function addComment(data){
   return (dispatch) => {
-    return fetch('http://localhost:5000/comments/create', {
+    return fetch('http://localhost:5000/api/comments/', {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -388,4 +400,80 @@ export function addComment(data){
         console.error('Error:', error);
       });
   }
+}
+
+export function deleteComment(id){
+  return (dispatch) => {
+    return fetch('http://localhost:5000/api/comments/' + id, {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return dispatch({type: DELETE_COMMENT, data})
+      })
+      .catch((error) => {
+        console.log(error)
+        console.error('Error:', error);
+      });
+  }
+}
+
+export function sendNotification(data) {
+  console.log(data)
+  return (dispatch) => {
+    return fetch('http://localhost:5000/api/notifications/' + data.userID, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return dispatch({type: SEND_NOTIFICATION, data})
+      })
+      .catch((error) => {
+        console.log(error)
+        console.error('Error:', error);
+      });
+  }
+
+}
+
+export function getNotifications() {
+  return (dispatch) => {
+    return fetch('http://localhost:5000/api/notifications/', {
+      method: 'GET',
+      credentials: 'include'
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return dispatch({type: GET_NOTIFICATIONS, data})
+      })
+      .catch((error) => {
+        console.log(error)
+        console.error('Error:', error);
+      });
+  }
+
+}
+
+export function markAsRead(id) {
+  return (dispatch) => {
+    return fetch('http://localhost:5000/api/notifications/markAsRead/'+id, {
+      method: 'PUT',
+      credentials: 'include'
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        return dispatch({type: MARK_AS_READ, data})
+      })
+      .catch((error) => {
+        console.log(error)
+        console.error('Error:', error);
+      });
+  }
+
 }

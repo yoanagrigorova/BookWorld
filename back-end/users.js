@@ -2,11 +2,11 @@ var express = require('express');
 var router = express.Router();
 const sha1 = require('sha1');
 
-router.get("/all", function(req,res){
+router.get("/", function(req,res){
     let db = req.db;
     let User = db.get("users");
     User.find().then(data=>{
-        let users = data.filter(u => u._id).map(user => {return {username: user.username, id: user._id, photo: user.photo, email:user.email}})
+        let users = data.filter(u => u._id).map(user => {return {username: user.username, id: user._id, photo: user.photo, email:user.email, role: user.role}})
         res.send(users)
     })
 })
@@ -16,7 +16,7 @@ router.get('/checkSession', function (req, res) {
     if (req.session.user) {
         res.send(req.session.user)
     } else {
-        res.send(JSON.stringify(null));
+        res.send({msg: "Not found"});
     }
 });
 
@@ -30,7 +30,7 @@ router.get('/signOut', function (req, res) {
     }
 });
 
-router.post('/create', function (req, res) {
+router.post('/', function (req, res) {
     let db = req.db;
     let User = db.get("users");
     User.insert({
@@ -122,9 +122,8 @@ router.post('/login', function (req, res) {
 
 })
 
-router.put("/addFavorite", (req, res) => {
-    let email = req.body.email;
-    let book = req.body.bookID;
+router.put("/addFavorite/:bookID", (req, res) => {
+    let book = req.params.bookID;
     let db = req.db;
     let User = db.get("users");
 
@@ -159,9 +158,8 @@ router.put("/addFavorite", (req, res) => {
 
 })
 
-router.put("/removeFavorite", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
+router.put("/removeFavorite/:bookID", (req, res) => {
+    let book = req.params.bookID;
     let db = req.db;
     let User = db.get("users");
 
@@ -197,9 +195,8 @@ router.put("/removeFavorite", (req, res) => {
 })
 
 
-router.put("/removeWish", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
+router.put("/removeWish/:bookID", (req, res) => {
+    let book = req.params.bookID;
     let db = req.db;
     let User = db.get("users");
     User.findOneAndUpdate({
@@ -233,9 +230,8 @@ router.put("/removeWish", (req, res) => {
 
 })
 
-router.put("/addRead", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
+router.put("/addRead/:bookID", (req, res) => {
+    let book = req.params.bookID;
     let db = req.db;
     let User = db.get("users");
 
@@ -270,9 +266,8 @@ router.put("/addRead", (req, res) => {
 
 })
 
-router.put("/removeRead", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
+router.put("/removeRead/:bookID", (req, res) => {
+    let book = req.params.bookID;
 
     let db = req.db;
     let User = db.get("users");
@@ -308,9 +303,8 @@ router.put("/removeRead", (req, res) => {
 
 })
 
-router.put("/addWish", (req, res) => {
-    let user = req.body.userID;
-    let book = req.body.bookID;
+router.put("/addWish/:bookID", (req, res) => {
+    let book = req.params.bookID;
 
     let db = req.db;
     let User = db.get("users");

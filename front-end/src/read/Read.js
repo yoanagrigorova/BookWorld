@@ -37,7 +37,8 @@ class Read extends React.Component {
 
         this.state = {
             read: [],
-            currentUser: props.currentUser ? props.currentUser : null
+            currentUser: props.currentUser ? props.currentUser : null,
+            loaded:false
         }
 
         if (!props.currentUser) {
@@ -58,7 +59,12 @@ class Read extends React.Component {
                     }
                 })
                 this.setState({
-                    read: [...data.data]
+                    read: [...data.data].sort((a, b) => {
+                        if(a.title < b.title) return -1;
+                        if(a.title > b.title) return 1;
+                        return 0;
+                    }),
+                    loaded:true
                 })
             })
         }
@@ -74,7 +80,12 @@ class Read extends React.Component {
                 }
             })
             this.setState({
-                read: [...this.props.read]
+                read: [...this.props.read].sort((a, b) => {
+                    if(a.title < b.title) return -1;
+                    if(a.title > b.title) return 1;
+                    return 0;
+                }),
+                loaded:true
             })
         }
     }
@@ -199,7 +210,7 @@ class Read extends React.Component {
                     }
 
                     {
-                        this.state.read.length === 0 ?
+                        this.state.loaded && this.state.read.length === 0 ?
                             <div className="noResult">
                                 <div className="row">
                                     <i className="large material-icons prefix col s12">mood_bad</i>

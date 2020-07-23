@@ -36,7 +36,8 @@ class Favorites extends React.Component {
 
         this.state = {
             favorites: [],
-            currentUser: props.currentUser ? props.currentUser : null
+            currentUser: props.currentUser ? props.currentUser : null,
+            loaded:false
         }
 
         if (!props.currentUser) {
@@ -63,7 +64,12 @@ class Favorites extends React.Component {
                     }
                 })
                 this.setState({
-                    favorites: [...data.data]
+                    favorites: [...data.data].sort((a, b) => {
+                        if(a.title < b.title) return -1;
+                        if(a.title > b.title) return 1;
+                        return 0;
+                    }),
+                    loaded:true
                 })
             })
         }
@@ -84,7 +90,12 @@ class Favorites extends React.Component {
                 }
             })
             this.setState({
-                favorites: [...this.props.favorites]
+                favorites: [...this.props.favorites].sort((a, b) => {
+                    if(a.title < b.title) return -1;
+                    if(a.title > b.title) return 1;
+                    return 0;
+                }),
+                loaded:true
             })
         }
         // M.FormSelect.init(this.dropdown);
@@ -247,13 +258,13 @@ class Favorites extends React.Component {
                                             <div className="card-action">
                                                 {
                                                     book.wish ?
-                                                        <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseOut} onClick={() => this.removeFromWishList(book._id)} data-tooltip="Remove from Wish List">Whish list</a>
+                                                        <span><a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseOut} onClick={() => this.removeFromWishList(book._id)} data-tooltip="Remove from Wish List">Whish list</a> <i className="material-icons check">check</i></span>
                                                         :
                                                         <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseOut} onClick={() => this.addToWishList(book._id)} data-tooltip="Add to Wish List">Whish list</a>
                                                 }
                                                 {
                                                     book.read ?
-                                                        <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseOut} onClick={() => this.removeFromReadList(book._id)} data-tooltip="Remove from Read">Read</a>
+                                                        <span><a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseOut} onClick={() => this.removeFromReadList(book._id)} data-tooltip="Remove from Read">Read</a> <i className="material-icons check">check</i></span>
                                                         :
                                                         <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onMouseLeave={this.handleMouseOut} onClick={() => this.addToReadList(book._id)} data-tooltip="Add to Read">Read</a>
                                                 }
@@ -266,7 +277,7 @@ class Favorites extends React.Component {
                         })
                     }
                     {
-                        this.state.favorites.length === 0 ?
+                        this.state.loaded && this.state.favorites.length === 0 ?
                             <div className="noResult">
                                 <div className="row">
                                     <i className="large material-icons prefix col s12">mood_bad</i>

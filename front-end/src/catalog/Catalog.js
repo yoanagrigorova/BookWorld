@@ -11,6 +11,7 @@ import {
 import { connect } from "react-redux";
 import M from 'materialize-css';
 
+
 const mapStateToProps = state => {
     return {
         currentUser: state.currentUser,
@@ -73,14 +74,21 @@ class Catalog extends React.Component {
                     }
                 })
                 this.setState({
-                    books: [...books],
-                    filtered: [...books],
-                    categories: [...categories],
+                    books: [...books].sort((a, b) => {
+                        if(a.title < b.title) return -1;
+                        if(a.title > b.title) return 1;
+                        return 0;
+                    }),
+                    filtered: [...books].sort((a, b) => {
+                        if(a.title < b.title) return -1;
+                        if(a.title > b.title) return 1;
+                        return 0;
+                    }),
+                    categories: [...categories]
                 })
                 M.FormSelect.init(this.select);
             })
         }
-
     }
 
     componentDidMount() {
@@ -92,23 +100,31 @@ class Catalog extends React.Component {
             books.forEach(book => {
                 if (this.state.currentUser.favorites.indexOf(book._id) !== -1) {
                     book.favorite = true
-                }else{
+                } else {
                     book.favorite = false
                 }
                 if (this.state.currentUser.wish.indexOf(book._id) !== -1) {
                     book.wish = true
-                }else{
+                } else {
                     book.wish = false
                 }
                 if (this.state.currentUser.read.indexOf(book._id) !== -1) {
                     book.read = true
-                }else{
+                } else {
                     book.read = false
                 }
             })
             this.setState({
-                books: [...books],
-                filtered: [...books],
+                books: [...books].sort((a, b) => {
+                    if(a.title < b.title) return -1;
+                    if(a.title > b.title) return 1;
+                    return 0;
+                }),
+                filtered: [...books].sort((a, b) => {
+                    if(a.title < b.title) return -1;
+                    if(a.title > b.title) return 1;
+                    return 0;
+                }),
                 categories: [...categories],
             })
             setTimeout(() => M.FormSelect.init(this.select), 100)
@@ -147,7 +163,6 @@ class Catalog extends React.Component {
         let self = this;
         this.props.addToFavorite(data).then(data => {
             if (data.data.result && data.data.result === 'success') {
-                // window.localStorage.setItem("currentUser", JSON.stringify(data.data));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -183,7 +198,6 @@ class Catalog extends React.Component {
                 let user = { ...this.state.currentUser };
                 let index = user.favorites.indexOf(bookID);
                 user.favorites.splice(index, 1);
-                // window.localStorage.setItem("currentUser", JSON.stringify(user));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -210,7 +224,6 @@ class Catalog extends React.Component {
     }
 
     addToWishList = (bookID) => {
-        // console.log(bookID);
         let data = {
             userID: this.state.currentUser.id,
             bookID: bookID
@@ -219,7 +232,6 @@ class Catalog extends React.Component {
         this.props.addToWish(data).then(data => {
             console.log(data)
             if (data.data.result && data.data.result === 'success') {
-                // window.localStorage.setItem("currentUser", JSON.stringify(data.data));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -240,7 +252,6 @@ class Catalog extends React.Component {
                 })
             }
             this.props.getWished(this.state.currentUser.id)
-            // this.props.checkSession();
         })
     }
 
@@ -255,7 +266,6 @@ class Catalog extends React.Component {
                 let user = { ...this.state.currentUser };
                 let index = user.wish.indexOf(bookID);
                 user.wish.splice(index, 1);
-                // window.localStorage.setItem("currentUser", JSON.stringify(user));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -276,7 +286,6 @@ class Catalog extends React.Component {
                 })
             }
             this.props.getWished(this.state.currentUser.id)
-            // this.props.checkSession();
         })
     }
 
@@ -288,7 +297,6 @@ class Catalog extends React.Component {
         let self = this;
         this.props.addToRead(data).then(data => {
             if (data.data.result && data.data.result === 'success') {
-                // window.localStorage.setItem("currentUser", JSON.stringify(data.data));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -309,7 +317,6 @@ class Catalog extends React.Component {
                 })
             }
             this.props.getRead(this.state.currentUser.id)
-            // this.props.checkSession();
         })
     }
 
@@ -324,7 +331,6 @@ class Catalog extends React.Component {
                 let user = { ...this.state.currentUser };
                 let index = user.read.indexOf(bookID);
                 user.read.splice(index, 1);
-                // window.localStorage.setItem("currentUser", JSON.stringify(user));
                 let dummy = [...self.state.books]
                 dummy.forEach(book => {
                     if (book._id === bookID) {
@@ -345,7 +351,6 @@ class Catalog extends React.Component {
                 })
             }
             this.props.getRead(this.state.currentUser.id)
-            // this.props.checkSession();
         })
     }
 
@@ -385,28 +390,33 @@ class Catalog extends React.Component {
                                         </div>
                                         <span className="card-stacked">
                                             <span className="card-content">
-                                                {!book.favorite ?
-                                                    <i className="material-icons addFavorite tooltipped" onClick={() => this.addToFavorites(book._id)} data-position="left" onMouseOver={this.handleMouseOver} data-tooltip="Add to Favorites">favorite_border</i>
-                                                    :
-                                                    <i className="material-icons addFavorite tooltipped" data-position="left" onMouseOver={this.handleMouseOver} data-tooltip="Remove from Favorites" onClick={() => this.removeFromFavorites(book._id)}>favorite</i>
+                                                {this.state.currentUser.role === "user" &&
+                                                    (!book.favorite ?
+                                                        <i className="material-icons addFavorite tooltipped" onClick={() => this.addToFavorites(book._id)} data-position="left" onMouseOver={this.handleMouseOver} data-tooltip="Add to Favorites">favorite_border</i>
+                                                        :
+                                                        <i className="material-icons addFavorite tooltipped" data-position="left" onMouseOver={this.handleMouseOver} data-tooltip="Remove from Favorites" onClick={() => this.removeFromFavorites(book._id)}>favorite</i>)
                                                 }
+
                                                 <Link to={`/book/${book._id}`} className="card-title activator grey-text text-darken-4">{book.title}</Link>
                                                 <p>Authors: {book.authors.map((author) => <span key={author}>{author} <br /></span>)}</p>
                                             </span>
-                                            <div className="card-action">
-                                                {
-                                                    book.wish ?
-                                                        <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.removeFromWishList(book._id)} data-tooltip="Remove from Wish List">Whish list</a>
-                                                        :
-                                                        <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.addToWishList(book._id)} data-tooltip="Add to Wish List">Whish list</a>
-                                                }
-                                                {
-                                                    book.read ?
-                                                        <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.removeFromReadList(book._id)} data-tooltip="Remove from Read">Read</a>
-                                                        :
-                                                        <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.addToReadList(book._id)} data-tooltip="Add to Read">Read</a>
-                                                }
-                                            </div>
+                                            {
+                                                this.state.currentUser.role === "user" &&
+                                                <div className="card-action">
+                                                    {
+                                                        book.wish ?
+                                                         <span>  <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.removeFromWishList(book._id)} data-tooltip="Remove from Wish List">Whish list</a> <i className="material-icons check">check</i> </span>
+                                                            :
+                                                            <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.addToWishList(book._id)} data-tooltip="Add to Wish List">Whish list</a>
+                                                    }
+                                                    {
+                                                        book.read ?
+                                                            <span> <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.removeFromReadList(book._id)} data-tooltip="Remove from Read">Read</a><i className="material-icons check">check</i></span>
+                                                            :
+                                                            <a className="tooltipped" data-position="top" onMouseOver={this.handleMouseOver} onClick={() => this.addToReadList(book._id)} data-tooltip="Add to Read">Read</a>
+                                                    }
+                                                </div>
+                                            }
                                         </span>
                                     </span>
                                 </span>

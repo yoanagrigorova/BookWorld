@@ -53,3 +53,28 @@
 nav{
   background-color: #3aafa9;
 }
+
+nav .brand-logo {
+  position: relative;
+}
+
+.notifications{
+  position: absolute;
+  width: 350px;
+  max-height:500px;
+  overflow: auto;
+  left: 20px;
+  background-color: #d2e2e1;
+  z-index: 999;
+}
+
+.notifications h5{
+  font-weight: bold;
+}
+
+#closeNotifications{
+  position: absolute;
+  right: 15px;
+  top: 10px;
+  cursor: pointer;
+}

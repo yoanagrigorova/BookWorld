@@ -1,7 +1,6 @@
 import React from 'react';
 import "./Registration.css"
 import { createUser } from "../actions/index";
-import  { Redirect } from 'react-router-dom'
 import { connect } from "react-redux";
 
 const mapStateToProps = state => {
@@ -24,8 +23,6 @@ class Registration extends React.Component {
             error: false,
             errorMessage: '',
             errorKey: "",
-            // firstName: "",
-            // lastName: "",
             email: "",
             password: "",
             username: ""
@@ -45,12 +42,9 @@ class Registration extends React.Component {
             let data = {
                 email: this.state.email,
                 password: this.state.password,
-                // lastName: this.state.lastName,
-                // firstName: this.state.firstName,
                 username: this.state.username
             }
             this.props.createUser(data).then((data) => {
-                console.log(data)
                 if (data.payload.result === 'error') {
                     this.setState({
                         error: true,
@@ -62,10 +56,11 @@ class Registration extends React.Component {
 
                 if (data.payload.result === 'success') {
                     this.props.update(data.payload);
-                    this.props.history.push("/");
+                    setTimeout(()=>{
+                        this.props.history.push("/catalog");
+                    }, 500)
                 }
             })
-            //send to home page with signed in user
         } else {
             setTimeout(() => {
                 this.setState({
@@ -76,10 +71,22 @@ class Registration extends React.Component {
     }
 
     validate = () => {
-        return true;
+        let passwordValidation = new RegExp("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})");
+        let usernameValidation = new RegExp("^[a-zA-Z0-9]+$");
+        let emailValidation =  /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if(emailValidation.test(this.state.email) && usernameValidation.test(this.state.username) && passwordValidation.test(this.state.password)){
+            return true;
+        }
+        return false;
+
     }
 
     render() {
+        let passwordValidation = new RegExp("^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})");
+        let usernameValidation = new RegExp("^[a-zA-Z0-9]+$");
+        let emailValidation =  /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
         return (
             <div className="registration">
                 <div className=" row container">
@@ -87,30 +94,37 @@ class Registration extends React.Component {
                     <form className="col s12" onSubmit={this.handleSubmit}>
                         <div className="row">
                             <div className="input-field col s10 offset-s1">
-                                <input id="username" type="text" className="validate" required value={this.state.username}
+                                <input id="username" type="text" className={usernameValidation.test(this.state.username)? "valid": "invalid"} required value={this.state.username}
                                     onChange={this.handleChange} />
                                 <label htmlFor="username">Username</label>
                                 {
                                     this.state.error && this.state.errorKey === 'username' ?
                                      <span className="errorMessage"><i class="small material-icons">report</i> <p> {this.state.errorMessage} </p> </span> : ""
                                 }
+                                {(this.state.username.length && !usernameValidation.test(this.state.username)) ? <span className="errorMessage"><p> Username should be only letters and numbers. </p> </span> : "" }
                             </div>
                         </div>
                         <div className="row">
                             <div className="input-field col s10 offset-s1">
-                                <input id="email" type="email" className="validate" required value={this.state.email}
+                                <input id="email" type="email" className={emailValidation.test(this.state.email)? "valid": "invalid"} required value={this.state.email}
                                     onChange={this.handleChange} />
                                 <label htmlFor="email">Email</label>
                                 {
                                     this.state.error && this.state.errorKey === 'email' ? <span className="errorMessage"><i class="small material-icons">report</i> <p> {this.state.errorMessage} </p> </span> : ""
                                 }
+                                {
+                                    (this.state.email.length && !emailValidation.test(this.state.email)) ? <span className="errorMessage"><p> Email addres is invalid. </p> </span> : "" 
+                                }
                             </div>
                         </div>
                         <div className="row">
                             <div className="input-field col s10 offset-s1">
-                                <input id="password" type="password" className="validate" required value={this.state.password}
+                                <input id="password" type="password" className={passwordValidation.test(this.state.password)? "valid": "invalid"} required value={this.state.password}
                                     onChange={this.handleChange} />
                                 <label htmlFor="password">Password</label>
+                                {
+                                    (this.state.password.length && !passwordValidation.test(this.state.password)) ? <span className="errorMessage"> <p> Password should be at least 8 characters with at least one number and special character.</p> </span> : "" 
+                                }
                             </div>
                         </div>
                         {

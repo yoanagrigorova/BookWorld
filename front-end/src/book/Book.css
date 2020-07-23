@@ -36,3 +36,13 @@
 .users li {
     cursor: pointer;
 }
+
+#deleteComment{
+    position: absolute;
+    right: 50px;
+    cursor: pointer;
+}
+
+#bookContainer .dropdown-content li>a{
+    display:inline-flex !important;
+}
