@@ -24,6 +24,6 @@
     "redux-thunk": "^2.3.0",
     "request": "^2.88.2",
     "sha1": "^1.1.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.5.0"
   }
 }
